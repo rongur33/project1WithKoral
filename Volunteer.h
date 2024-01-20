@@ -62,7 +62,6 @@ class LimitedCollectorVolunteer: public CollectorVolunteer {
         bool hasOrdersLeft() const override;
         bool canTakeOrder(const Order &order) const override;
         void acceptOrder(const Order &order) override;
-
         int getMaxOrders() const;
         int getNumOrdersLeft() const;
         string toString() const override;

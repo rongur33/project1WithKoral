@@ -28,7 +28,13 @@ return new CollectorVolunteer(*this);
 }
 
 void CollectorVolunteer::step(){
-   
+   bool isDone= decreaseCoolDown();
+   if(isDone){
+    completedOrderId=activeOrderId;
+    activeOrderId=NO_ORDER;
+    timeLeft=coolDown;
+   }
+
 }
 int CollectorVolunteer::getCoolDown() const {
     return coolDown;
@@ -59,7 +65,7 @@ void CollectorVolunteer::acceptOrder(const Order& order) {
 }
 
 string CollectorVolunteer::toString() const {
-    return " Collector Volunteer " + getName()+". his id is "+ getId()+" ."+"His cooldown time is "+getCoolDown()+" and "+getTimeLeft()+" left until the volunteer finishes his current order .";
+    return " Collector Volunteer " + getName()+". his id is "+std::to_string(getId())+" ."+"His cooldown time is "+std::to_string(getCoolDown())+" and "+std::to_string(getTimeLeft())+" left until the volunteer finishes his current order .";
 }
 
 // LimitedCollectorVolunteer class implementation
@@ -84,9 +90,6 @@ void LimitedCollectorVolunteer::acceptOrder(const Order& order) {
     ordersLeft--;
 }
 
-string LimitedCollectorVolunteer::toString() const {
-    return " Limited Collector Volunteer " + getName()+". his id is "+getId()+" ."+"His cooldown time is "+getCoolDown()+" and "+getTimeLeft()+" left until the volunteer finishes his current order .";
-}
 
 int LimitedCollectorVolunteer::getMaxOrders() const {
     return maxOrders;
@@ -96,7 +99,7 @@ int LimitedCollectorVolunteer::getNumOrdersLeft() const {
     return ordersLeft;
 }
 string LimitedCollectorVolunteer::toString() const {
-    return " Limited Collector Volunteer " + getName()+". his id is " + getId()+" ."+"His cooldown time is "+getCoolDown()+" and "+getTimeLeft()+" left until the volunteer finishes his current order .";
+    return " Limited Collector Volunteer " + getName()+". his id is " +std::to_string(getId())+" ."+"His cooldown time is "+std::to_string(getCoolDown())+" and "+std::to_string(getTimeLeft())+" left until the volunteer finishes his current order .";
 }
 
 
@@ -134,7 +137,7 @@ bool DriverVolunteer::hasOrdersLeft() const {
 }
 
 bool DriverVolunteer::canTakeOrder(const Order& order) const {
-    return !isBusy() && maxDistance<=order.
+    return !isBusy() && maxDistance<=order.getDistance();
 }
 
 void DriverVolunteer::acceptOrder(const Order& order) {
@@ -143,17 +146,16 @@ void DriverVolunteer::acceptOrder(const Order& order) {
 }
 
 void DriverVolunteer::step() {
-    if (distanceLeft > 0) {
-        distanceLeft -= distancePerStep;
-        if (distanceLeft <= 0) {
-            completedOrderId = activeOrderId;
-            activeOrderId = NO_ORDER;
-        }
-    }
+   bool isFinishStep = decreaseDistanceLeft();
+   if(isFinishStep){
+    distanceLeft=maxDistance;
+    completedOrderId=activeOrderId;
+    activeOrderId=NO_ORDER;
+   }
 }
 
 string DriverVolunteer::toString() const {
-    return "Driver Volunteer " + getName();
+    return "Driver Volunteer " + getName()+". his id is " + std::to_string(getId())+" ."+" His maxDistance  is "+std::to_string(getMaxDistance())+" and "+std::to_string(getDistanceLeft())+" left until the volunteer finishes his current order .";
 }
 
 // LimitedDriverVolunteer class implementation
@@ -178,7 +180,7 @@ bool LimitedDriverVolunteer::hasOrdersLeft() const {
 }
 
 bool LimitedDriverVolunteer::canTakeOrder(const Order& order) const {
-    return !isBusy() && order.getDistance() <= maxDistance && ordersLeft > 0;
+    return !isBusy() && order.getDistance() <= getMaxDistance() && hasOrdersLeft();
 }
 
 void LimitedDriverVolunteer::acceptOrder(const Order& order) {

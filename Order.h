@@ -23,11 +23,13 @@ class Order {
         Order(int id, int customerId, int distance);
         int getId() const;
         int getCustomerId() const;
+        int getDistance() const;
         void setStatus(OrderStatus status);
         void setCollectorId(int collectorId);
         void setDriverId(int driverId);
         int getCollectorId() const;
         int getDriverId() const;
+        int getDistance() const;
         OrderStatus getStatus() const;
         const string toString() const;
 

@@ -8,80 +8,130 @@ using std::string;
 #include "../include/Volunteer.h"
 #include "../include/Customer.h"
 #include "../include/WareHouse.h"
-#include "../include/BaseAction.h"
+#include "../include/Action.h"
+#include <fstream>
+#include <sstream>
 
-int getFirstNumber(const std::string& inputString);
 
-WareHouse:: WareHouse(const string &configFile){
+
+WareHouse:: WareHouse(const string &configFile): isOpen(true), customerCounter(0), volunteerCounter(0){
+    pendingOrders = {};
+    inProcessOrders = {};
+    completedOrders = {};
+}
+void WareHouse::start(){
 
 }
-void stringIdentifier(string &syntax){
+const vector<Action*>& WareHouse::getActions() const{
+    return actionsLog;
+}
+void WareHouse:: addOrder(Order* order){
+    pendingOrders.push_back(order);
+}
+void WareHouse:: addAction(Action* action){
+    actionsLog.push_back(action);
+}
+Customer& WareHouse:: getCustomer(int customerId) const{
+    for(Customer* cust :customers){
+        if(cust->getId()==customerId){
+            return *cust ;
+        }
+    }
+    throw std::invalid_argument("no customer with this id exict");
+}
+Volunteer& WareHouse:: getVolunteer(int volunteerId) const{
+    for(Volunteer* volunteer :volunteers){
+        if(volunteer->getId()==volunteerId){
+            return *volunteer ;
+        }
+    }
+    throw std::invalid_argument("no volenteer with this id exict");
+}
+Order& WareHouse::getOrder(int orderId) const{
+    for(Order* _order :pendingOrders){
+        if(_order->getId()==orderId){
+            return *_order ;
+        }
+    }
+    for(Order* _order :inProcessOrders){
+        if(_order->getId()==orderId){
+            return *_order ;
+        }
+    }
+    for(Order* _order :completedOrders){
+        if(_order->getId()==orderId){
+            return *_order ;
+        }
+    }
+    throw std::invalid_argument("no volenteer with this id exict");
+}
+void WareHouse::close(){
+
+}
+void WareHouse::open(){
+
+}
+
+Action stringIdentifier(std::string &syntax) {
     int input=getFirstNumber(syntax);
-    
     if(syntax[0]=='s'){
        SimulateStep steps(input);
-       steps.act(); 
+       return steps; 
     }
     else if (syntax[0]=='v')
     {
         PrintVolunteerStatus status(input);
-        status.act();
+       return status;
     }
     else if (syntax[0]=='l')
     {
          PrintActionsLog logs;
-         logs.act();
+         return logs;
     }
     else if (syntax[0]=='b')
     {
         BackupWareHouse backup;
-        backup.act();
+        return backup;
     }
     else if (syntax[0]=='r')
     {
          RestoreWareHouse restore;
-         restore.act();
+         return restore;
     }
     else if (syntax[0]=='o')
     {
         if(syntax[5]=='s'){
              PrintOrderStatus orders(input);
-             orders.act();
+             return orders;
         }
         else{
-             Order newOrder(input);
-             newOrder.act();
+             AddOrder newOrder(input);
+             return newOrder;
         }
     }
     else{
         if(syntax[4]=='e'){
             Close closeCommand;
-            closeCommand.act();
+            return closeCommand;
         }
         else if (syntax[8]=='s')
         {
-             PrintCustomerStatus costumerstatus(input);
-             costumerstatus.act();
+             PrintCustomerStatus costumerStatus(input);
+             return costumerStatus;
         }
         else{
-            string name=extractStringAfterSpaces(&syntax,1);
-            string role=extractStringAfterSpaces(&syntax,2);
-            string newDistancestr= extractStringAfterSpaces(&syntax,3);
-            string maxOrderstr= extractStringAfterSpaces(&syntax,4);
+            string name=extractStringAfterSpaces(syntax,1);
+            string role=extractStringAfterSpaces(syntax,2);
+            string newDistancestr= extractStringAfterSpaces(syntax,3);
+            string maxOrderstr= extractStringAfterSpaces(syntax,4);
             int newDistanceint = std::stoi( newDistancestr);
             int maxOrderint = std::stoi( maxOrderstr);
             AddCustomer newCustomer(name,role,newDistanceint,maxOrderint);
-            newCustomer.act();
+            return newCustomer;
         }
         
         
-    }
-    
-    
-    
-    
-    
-    
+    }   
 }
 int getFirstNumber(const std::string& input) {
     size_t i = 0;
@@ -126,6 +176,64 @@ std::string extractStringAfterSpaces(const std::string& input, int spaces) {
     }
 
     return result;
+}
+
+void WareHouse::parseConfigFile(const string &configFilePath) {
+    ifstream configFile(configFilePath);
+    string line;
+    while (getline(configFile, line)) {
+        if (line.empty() || line[0] == '#') {
+            // Skip empty lines and comments
+            continue;
+        }
+
+        istringstream iss(line);
+        string type;
+        iss >> type;
+
+        if (type == "customer") {
+            string name, customerType;
+            int distance, maxOrders;
+            iss >> name >> customerType >> distance >> maxOrders;
+
+            Customer *newCustomer = nullptr;
+            if (customerType == "soldier") {
+                newCustomer = new SoldierCustomer(customerCounter++, name, distance, maxOrders);
+            } else if (customerType == "civilian") {
+                newCustomer = new CivilianCustomer(customerCounter++, name, distance, maxOrders);
+            }
+            customers.push_back(newCustomer);
+            
+        } else if (type == "volunteer") {
+            string name, role;
+            int cooldown, maxDistance, distancePerStep, maxOrders = -1;
+            iss >> name >> role >> cooldown;
+
+            if (role == "driver") {
+                iss >> maxDistance >> distancePerStep;
+            } else {
+                iss >> maxDistance; // For collectors and other roles
+            }
+
+            // Check if maxOrders is provided (optional)
+            if (iss >> maxOrders && maxOrders <= 0) {
+                cerr << "Error: Invalid maxOrders for volunteer " << name << ". It must be greater than 0." << endl;
+                continue;
+            }
+
+            Volunteer *newVolunteer = nullptr;
+            if (role == "limited_collector") {
+                newVolunteer = new LimitedCollectorVolunteer(volunteerCounter++, name, cooldown, maxOrders);
+            } else if (role == "limited_driver") {
+                newVolunteer = new LimitedDriverVolunteer(volunteerCounter++, name, maxDistance, distancePerStep, maxOrders);
+            } else if (role == "collector") {
+                newVolunteer = new CollectorVolunteer(volunteerCounter++, name, cooldown);
+            } else if (role == "driver") {
+                newVolunteer = new DriverVolunteer(volunteerCounter++, name, maxDistance, distancePerStep);
+            }
+            volunteers.push_back(newVolunteer);
+    }
+    configFile.close();
 }
 
 int main() {
