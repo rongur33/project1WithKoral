@@ -12,7 +12,7 @@ int Order:: getCustomerId() const{
     return customerId;
 }
 
-int Order:: getDistance() const {
+int Order:: getDistance() const{
     return distance;
 }
 
@@ -42,5 +42,5 @@ OrderStatus Order:: getStatus() const{
 }
 
 const string Order:: toString() const{
-    return "the id of the order is" +std::to_string(getId())+ ","+ "customer id:" + std::to_string(getCustomerId())+ "," + "status order:" + getStatus()+ "collector id:" + std::to_string(getCollectorId())+ "," + "driver id:" + std::to_string(getDriverId());
+    return "OrderId: " +std::to_string(getId())+ "\n"+"OrderStatus: "+ std::to_string(static_cast<int>(getStatus()))+"\n" +"CustomerID: " + std::to_string(getCustomerId())+ "\n" +"Collector: " + std::to_string(getCollectorId()) + "Driver: " + std::to_string(getDriverId());
 }
