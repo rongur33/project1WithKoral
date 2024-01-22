@@ -23,17 +23,26 @@ class WareHouse {
         Customer &getCustomer(int customerId) const;
         Volunteer &getVolunteer(int volunteerId) const;
         Order &getOrder(int orderId) const;
+        const vector<Customer*> &getCustomers() const;
+        int getOrderCounter() const;
         void close();
         void open();
+        void addCustomer(Customer* _customer);
+        int getCustomerCounter() const;
 
     private:
         bool isOpen;
-        vector<Action*> actionsLog;//when finish parsing , build it in the constructor
-        vector<Volunteer*> volunteers;//when finish parsing , build it in the constructor
+        vector<Action*> actionsLog;
+        vector<Volunteer*> volunteers;
         vector<Order*> pendingOrders;
         vector<Order*> inProcessOrders;
         vector<Order*> completedOrders;
-        vector<Customer*> customers; //when finish parsing , build it in the constructor
+        vector<Customer*> customers; 
         int customerCounter; //For assigning unique customer IDs
         int volunteerCounter; //For assigning unique volunteer IDs
+        void parseConfigFile(const string &configFilePath);
+        void IdentifyAndPreform(std::string &syntax);
+        int getFirstNumber(const std::string& input);
+        string extractStringAfterSpaces(const std::string& input, int spaces);
+        int orderCounter;
 };
