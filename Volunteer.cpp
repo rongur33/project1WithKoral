@@ -29,12 +29,12 @@ return new CollectorVolunteer(*this);
 
 void CollectorVolunteer::step(){
    bool isDone= decreaseCoolDown();
-   if(isDone){
+   /*if(isDone){
     completedOrderId=activeOrderId;
     activeOrderId=NO_ORDER;
     timeLeft=coolDown;
    }
-
+*/
 }
 int CollectorVolunteer::getCoolDown() const {
     return coolDown;
@@ -147,12 +147,12 @@ void DriverVolunteer::acceptOrder(const Order& order) {
 
 void DriverVolunteer::step() {
    bool isFinishStep = decreaseDistanceLeft();
-   if(isFinishStep){
+  /* if(isFinishStep){
     distanceLeft=maxDistance;
     completedOrderId=activeOrderId;
-    activeOrderId=NO_ORDER;
-   }
-}
+    activeOrderId=NO_ORDER;}
+  */ }
+
 
 string DriverVolunteer::toString() const {
     return "Driver Volunteer " + getName()+". his id is " + std::to_string(getId())+" ."+" His maxDistance  is "+std::to_string(getMaxDistance())+" and "+std::to_string(getDistanceLeft())+" left until the volunteer finishes his current order .";
