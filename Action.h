@@ -34,7 +34,7 @@ class Action{
         ActionStatus status;
 };
 
-class SimulateStep : public Action {
+class SimulateStep : public Action { //לא עשינו את זה זה קשההה
 
     public:
         SimulateStep(int numOfSteps);
@@ -51,7 +51,7 @@ class AddOrder : public Action {
         AddOrder(int id);
         void act(WareHouse &wareHouse) override;
         AddOrder *clone() const override;
-        string toString() const override;
+        string toString() const override; 
     private:
         const int customerId;
 };
@@ -59,10 +59,10 @@ class AddOrder : public Action {
 
 class AddCustomer : public Action {
     public:
-        AddCustomer(string customerName, string customerType, int distance, int maxOrders);
+        AddCustomer(const string& customerName, const string& customerType, int distance, int maxOrders);
         void act(WareHouse &wareHouse) override;
         AddCustomer *clone() const override;
-        string toString() const override;
+        string toString() const override;  //איך מדפיסים את הנתונים? 
     private:
         const string customerName;
         const CustomerType customerType;
@@ -77,7 +77,7 @@ class PrintOrderStatus : public Action {
         PrintOrderStatus(int id);
         void act(WareHouse &wareHouse) override;
         PrintOrderStatus *clone() const override;
-        string toString() const override;
+        string toString() const override;//לדבר עם אנשים מה הם רשמו 
     private:
         const int orderId;
 };
